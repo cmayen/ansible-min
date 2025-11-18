@@ -1,0 +1,5 @@
+---
+deploy_user: deploy
+site_name: "example site"
+site_content: "Ansible deployed on {{ inventory_hostname }}!"
+nginx_root: /var/www/html

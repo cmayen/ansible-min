@@ -1,0 +1,63 @@
+---
+- name: Ensure apt cache is up to date (Debian/Ubuntu)
+  apt:
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - nginx
+    - python3
+    - python3-apt
+  become: true
+
+- name: Ensure deploy user exists
+  user:
+    name: "{{ deploy_user }}"
+    comment: "deploy user for site"
+    shell: /bin/bash
+    createhome: yes
+    state: present
+  become: true
+
+- name: Create web root directory
+  file:
+    path: "{{ nginx_root }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  become: true
+
+- name: Deploy index.html from template
+  template:
+    src: index.html.j2
+    dest: "{{ nginx_root }}/index.html"
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  notify: Restart nginx
+  become: true
+
+- name: Ensure nginx is enabled and started
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+  become: true
+
+- name: Allow HTTP and SSH via ufw (Ubuntu)
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+    #name: "{{ item }}"
+  loop:
+    - 22   # OpenSSH
+    - 80   # covers HTTP/HTTPS ("WWW Full" fails)
+    - 443
+  when: ansible_distribution == "Ubuntu" or ansible_distribution == "Debian"
+  become: true
