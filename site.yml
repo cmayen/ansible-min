@@ -1,0 +1,6 @@
+---
+- name: Provision and deploy nginx webserver
+  hosts: web
+  become: yes
+  roles:
+    - nginx
