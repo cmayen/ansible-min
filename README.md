@@ -105,3 +105,7 @@ integrate with git and CI pipeline
 
 use ansible-pull for pull based deploy on servers
 
+### To leave python environment created during test
+```
+deactivate
+```
